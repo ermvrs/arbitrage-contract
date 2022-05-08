@@ -1,0 +1,35 @@
+{
+    "name": "bott",
+    "version": "1.0.0",
+    "description": "",
+    "main": "truffle-config.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "migrate": "truffle migrate --network bscTestnet --reset",
+        "compile": "truffle compile --network bscTestnet",
+        "migrate:dev": "truffle migrate --network development",
+        "migrate:testnet": "truffle migrate --network testnet --reset",
+        "migrate:bsc": "truffle migrate --network bsc --reset",
+        "migrate:rinkeby": "truffle migrate --network rinkeby --reset"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@aave/core-v3": "^1.13.1",
+        "@openzeppelin/contracts": "^4.4.2",
+        "@pancakeswap/pancake-swap-lib": "^0.0.4",
+        "@truffle/hdwallet-provider": "^2.0.0",
+        "bignumber.js": "^9.0.2",
+        "chai": "^4.3.4",
+        "dotenv": "^10.0.0",
+        "merkletreejs": "^0.2.27",
+        "truffle-assertions": "^0.9.2",
+        "web3": "^1.6.1"
+    },
+    "devDependencies": {
+        "truffle-plugin-verify": "^0.5.21"
+    }
+}
