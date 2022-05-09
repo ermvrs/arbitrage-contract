@@ -9,7 +9,7 @@ contract Arbitrage is Ownable {
 
     IERC20 public baseToken = IERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // wbnb
     
-    function execute(IApePair[] memory _pairs, uint256[] memory _outAmounts, bool[] memory _directions, uint256 _amount) public onlyOwner isProfit returns(uint256) {
+    function execute(IApePair[] memory _pairs, uint256[] memory _outAmounts, bool[] memory _directions, uint256 _amount) public onlyOwner isProfit {
         require(baseToken.balanceOf(address(this)) >= _amount, "Initial amount not enough");
         require(_pairs.length == _outAmounts.length, "Sanity fail");
         require(_pairs.length == _directions.length, "Sanity2 fail");
@@ -43,8 +43,48 @@ contract Arbitrage is Ownable {
         }
     }
 
-    function estimation() public view {
+    function executeManuel(IApePair _pair, uint256 _start, uint256 _output) public onlyOwner {
+        baseToken.transfer(address(_pair), _start);
+        _pair.swap(0, _output, address(this), abi.encode(""));
+    }
 
+    function manuelApprove(IERC20 token, address spender, uint256 amount) public onlyOwner {
+        token.approve(spender, amount);
+    }
+
+    function executeWithRouter(IUniswapV2Router02[] memory _routers, address[] memory _paths, uint256 _amount) public onlyOwner {
+        for(uint i = 0; i < _routers.length; i++) {
+            IUniswapV2Router02 router = _routers[i];
+            if(i == 0) {
+                address[] memory path = new address[](2);
+                path[0] = _paths[0];
+                path[1] = _paths[1];
+                baseToken.approve(address(router), _amount);
+                router.swapExactTokensForTokensSupportingFeeOnTransferTokens(_amount, 0, path, address(this), block.timestamp);
+            } else if(i == 1) {
+                address[] memory path = new address[](2);
+                path[0] = _paths[i];
+                path[1] = _paths[i + 1];
+                IERC20 token = IERC20(_paths[i]);
+                uint256 balance = token.balanceOf(address(this));
+                token.approve(address(router), balance);
+                router.swapExactTokensForTokensSupportingFeeOnTransferTokens(balance, 0, path, address(this), block.timestamp);
+            } else {
+                // last
+                address[] memory path = new address[](2);
+                path[0] = _paths[i];
+                path[1] = _paths[0];
+                IERC20 token = IERC20(_paths[i]);
+                uint256 balance = token.balanceOf(address(this));
+                token.approve(address(router), balance);
+                router.swapExactTokensForTokensSupportingFeeOnTransferTokens(balance, 0, path, address(this), block.timestamp);
+            }
+        }
+    }
+
+
+    function withdraw(IERC20 token, uint256 amount) public onlyOwner {
+        token.transfer(msg.sender, amount);
     }
 
     modifier isProfit {
